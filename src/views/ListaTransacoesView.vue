@@ -25,17 +25,13 @@
         <template v-slot:item.valorVenda="{ item }">
           {{ formatarMoeda(item.valorVenda) }}
         </template>
-
-        <template v-slot:item.acoes="{ item }">
-          <v-btn icon="mdi-pencil" size="small" color="primary" @click="editarMovimento(item)" />
-        </template>
       </v-data-table>
     </v-card>
 
-    <!-- Dialog para Nova/Editar Movimentação -->
+    <!-- Dialog para Nova Movimentação -->
     <v-dialog v-model="dialogMovimento" max-width="600">
       <v-card>
-        <v-card-title>{{ movimentoEmEdicao.id ? 'Editar' : 'Nova' }} Movimentação</v-card-title>
+        <v-card-title>Nova Movimentação</v-card-title>
         <v-card-text>
           <v-form ref="form" v-model="formValido">
             <v-row>
@@ -92,8 +88,7 @@ const headers = [
   { title: 'Tipo', key: 'tipoMovimentacao', sortable: true },
   { title: 'Quantidade', key: 'quantidadeMovimentada', sortable: true },
   { title: 'Valor de Venda', key: 'valorVenda', sortable: true },
-  { title: 'Data', key: 'dataMovimentacao', sortable: true },
-  { title: 'Ações', key: 'acoes', sortable: false }
+  { title: 'Data', key: 'dataMovimentacao', sortable: true }
 ]
 
 const movimentos = ref<MovimentoEstoque[]>([])
@@ -113,11 +108,6 @@ const movimentoEmEdicao = ref<Partial<MovimentoEstoque>>({
   quantidadeMovimentada: 1,
   valorVenda: 0
 })
-
-const editarMovimento = (movimento: MovimentoEstoque) => {
-  movimentoEmEdicao.value = { ...movimento }
-  dialogMovimento.value = true
-}
 
 const abrirDialogMovimento = () => {
   movimentoEmEdicao.value = {
@@ -151,7 +141,7 @@ const carregarDados = async () => {
     mostrarSucesso('Dados carregados com sucesso')
   } catch (erro) {
     console.error('Erro ao carregar dados:', erro)
-    mostrarErro('Erro ao carregar dados')
+    mostrarErro(erro as Error)
   } finally {
     carregando.value = false
   }
@@ -162,15 +152,15 @@ const salvarMovimento = async () => {
     salvando.value = true
     const movimento: MovimentoEstoque = {
       ...movimentoEmEdicao.value as MovimentoEstoque,
-      dataMovimentacao: movimentoEmEdicao.value.dataMovimentacao || new Date().toISOString()
+      dataMovimentacao: new Date().toISOString()
     }
     await movimentoService.salvar(movimento)
     dialogMovimento.value = false
     await carregarDados()
-    mostrarSucesso('Movimentação ' + (movimento.id ? 'atualizada' : 'registrada') + ' com sucesso')
+    mostrarSucesso('Movimentação registrada com sucesso')
   } catch (erro) {
     console.error('Erro ao salvar movimentação:', erro)
-    mostrarErro('Erro ao ' + (movimentoEmEdicao.value.id ? 'atualizar' : 'registrar') + ' movimentação')
+    mostrarErro(erro as Error)
   } finally {
     salvando.value = false
   }

@@ -27,6 +27,10 @@ const realizarLogin = async () => {
     carregando.value = false
   }
 }
+
+const irParaCadastro = () => {
+  router.push('/register')
+}
 </script>
 
 <template>
@@ -52,12 +56,18 @@ const realizarLogin = async () => {
             </v-form>
           </v-card-text>
 
-          <v-card-actions class="pa-4">
+          <v-card-actions>
             <v-spacer />
             <v-btn color="primary" size="large" block :loading="carregando" @click="realizarLogin">
               Entrar
             </v-btn>
           </v-card-actions>
+
+          <v-card-text class="text-center">
+            <v-btn variant="text" @click="irParaCadastro" block>
+              Não tem uma conta? Cadastre-se
+            </v-btn>
+          </v-card-text>
         </v-card>
       </v-col>
     </v-row>

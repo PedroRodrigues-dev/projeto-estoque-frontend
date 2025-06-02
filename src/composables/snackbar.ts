@@ -1,40 +1,45 @@
 import { ref } from 'vue'
 
 interface SnackbarState {
-  mostrar: boolean
-  mensagem: string
-  cor: string
+  show: boolean
+  message: string
+  color: string
 }
 
 const snackbar = ref<SnackbarState>({
-  mostrar: false,
-  mensagem: '',
-  cor: 'success',
+  show: false,
+  message: '',
+  color: 'success',
 })
 
 export function useSnackbar() {
-  const mostrarMensagem = (mensagem: string, cor: string) => {
+  const mostrarSucesso = (message: string) => {
     snackbar.value = {
-      mostrar: true,
-      mensagem,
-      cor,
+      show: true,
+      message,
+      color: 'success',
     }
   }
 
-  const mostrarSucesso = (mensagem: string) => {
-    mostrarMensagem(mensagem, 'success')
-  }
-
-  const mostrarErro = (mensagem: string) => {
-    mostrarMensagem(mensagem, 'error')
+  const mostrarErro = (error: Error | string) => {
+    const message = error instanceof Error ? error.message : error
+    snackbar.value = {
+      show: true,
+      message,
+      color: 'error',
+    }
   }
 
   const mostrarAlerta = (mensagem: string) => {
-    mostrarMensagem(mensagem, 'warning')
+    snackbar.value = {
+      show: true,
+      message: mensagem,
+      color: 'warning',
+    }
   }
 
   const fechar = () => {
-    snackbar.value.mostrar = false
+    snackbar.value.show = false
   }
 
   return {

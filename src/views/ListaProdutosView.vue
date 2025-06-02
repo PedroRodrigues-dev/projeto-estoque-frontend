@@ -61,14 +61,15 @@
               </v-col>
 
               <v-col cols="12" md="6">
-                <v-select v-model="produtoEmEdicao.tipoProdutoId" :items="tiposProduto" item-title="nome"
-                  item-value="id" label="Tipo de Produto" required
-                  :rules="[(v: number) => !!v || 'Tipo é obrigatório']" />
+                <v-select v-model.number="produtoEmEdicao.tipoProdutoId" :items="tiposProduto" item-title="nome"
+                  item-value="id" label="Tipo de Produto" required :rules="[(v) => !!v || 'Tipo é obrigatório']"
+                  :return-object="false" />
               </v-col>
 
               <v-col cols="12" md="6">
-                <v-select v-model="produtoEmEdicao.fornecedorId" :items="fornecedores" item-title="nome" item-value="id"
-                  label="Fornecedor" required :rules="[(v: number) => !!v || 'Fornecedor é obrigatório']" />
+                <v-select v-model.number="produtoEmEdicao.fornecedorId" :items="fornecedores" item-title="nome"
+                  item-value="id" label="Fornecedor" required :rules="[(v) => !!v || 'Fornecedor é obrigatório']"
+                  :return-object="false" />
               </v-col>
 
               <v-col cols="12" md="6">
@@ -118,7 +119,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { produtoService, tipoProdutoService, fornecedorService, type Produto, type TipoProduto, type Fornecedor } from '@/services/api'
 import { useSnackbar } from '@/composables/snackbar'
 
@@ -157,6 +158,15 @@ const produtoEmEdicao = ref<Partial<Produto>>({
 
 const produtoParaExcluir = ref<Produto | null>(null)
 
+// Adicionar watchers para monitorar mudanças
+watch(() => produtoEmEdicao.value.tipoProdutoId, (novoValor) => {
+  console.log('Tipo de Produto alterado para:', novoValor)
+})
+
+watch(() => produtoEmEdicao.value.fornecedorId, (novoValor) => {
+  console.log('Fornecedor alterado para:', novoValor)
+})
+
 const formatarMoeda = (valor: number) => {
   return valor?.toLocaleString('pt-BR', {
     style: 'currency',
@@ -164,7 +174,8 @@ const formatarMoeda = (valor: number) => {
   })
 }
 
-const abrirDialogProduto = () => {
+const abrirDialogProduto = async () => {
+  await Promise.all([carregarTiposProduto(), carregarFornecedores()])
   produtoEmEdicao.value = {
     codigo: '',
     descricao: '',
@@ -177,27 +188,19 @@ const abrirDialogProduto = () => {
   dialogProduto.value = true
 }
 
-const editarProduto = (produto: Produto) => {
-  produtoEmEdicao.value = { ...produto }
+const editarProduto = async (produto: Produto) => {
+  await Promise.all([carregarTiposProduto(), carregarFornecedores()])
+  produtoEmEdicao.value = {
+    ...produto,
+    tipoProdutoId: produto.tipoProdutoId || produto.tipoProduto?.id,
+    fornecedorId: produto.fornecedorId || produto.fornecedor?.id
+  }
   dialogProduto.value = true
 }
 
 const confirmarExclusao = (produto: Produto) => {
   produtoParaExcluir.value = produto
   dialogExclusao.value = true
-}
-
-const carregarDados = async () => {
-  try {
-    carregando.value = true
-    produtos.value = await produtoService.listar()
-    mostrarSucesso('Produtos carregados com sucesso')
-  } catch (erro) {
-    console.error('Erro ao carregar produtos:', erro)
-    mostrarErro('Erro ao carregar produtos')
-  } finally {
-    carregando.value = false
-  }
 }
 
 const carregarTiposProduto = async () => {
@@ -218,10 +221,30 @@ const carregarFornecedores = async () => {
   }
 }
 
+const carregarDados = async () => {
+  try {
+    carregando.value = true
+    produtos.value = await produtoService.listar()
+    mostrarSucesso('Produtos carregados com sucesso')
+  } catch (erro) {
+    console.error('Erro ao carregar produtos:', erro)
+    mostrarErro('Erro ao carregar produtos')
+  } finally {
+    carregando.value = false
+  }
+}
+
 const salvarProduto = async () => {
   try {
     salvando.value = true
-    await produtoService.salvar(produtoEmEdicao.value as Produto)
+    const produtoParaSalvar = {
+      ...produtoEmEdicao.value,
+      tipoProdutoId: Number(produtoEmEdicao.value.tipoProdutoId),
+      fornecedorId: Number(produtoEmEdicao.value.fornecedorId),
+      tipoProduto: undefined,
+      fornecedor: undefined
+    }
+    await produtoService.salvar(produtoParaSalvar as Produto)
     dialogProduto.value = false
     await carregarDados()
     mostrarSucesso('Produto salvo com sucesso')

@@ -16,7 +16,6 @@
           </v-btn>
         </template>
         <v-list>
-          <v-list-item prepend-icon="mdi-account-settings" title="Perfil" @click="() => { }" />
           <v-list-item prepend-icon="mdi-logout" title="Sair" @click="logout" />
         </v-list>
       </v-menu>

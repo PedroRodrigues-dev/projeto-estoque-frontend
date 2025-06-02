@@ -128,6 +128,14 @@ export const produtoService = {
     return response.json()
   },
 
+  buscarPorId: async (id: number): Promise<Produto> => {
+    const response = await fetch(`${API_URL}/api/produtos/${id}`, {
+      headers: headers(),
+    })
+    if (!response.ok) await handleErrorResponse(response, 'Erro ao buscar produto')
+    return response.json()
+  },
+
   listarPorTipoComEstoque: async (tipoId: number): Promise<ProdutoEstoqueDTO[]> => {
     const response = await fetch(`${API_URL}/api/produtos/tipo/${tipoId}/estoque`, {
       headers: headers(),
@@ -170,6 +178,14 @@ export const tipoProdutoService = {
       headers: headers(),
     })
     if (!response.ok) await handleErrorResponse(response, 'Erro ao buscar tipos de produto')
+    return response.json()
+  },
+
+  buscarPorId: async (id: number): Promise<TipoProduto> => {
+    const response = await fetch(`${API_URL}/api/tipos-produto/${id}`, {
+      headers: headers(),
+    })
+    if (!response.ok) await handleErrorResponse(response, 'Erro ao buscar tipo de produto')
     return response.json()
   },
 

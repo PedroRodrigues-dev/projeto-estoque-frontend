@@ -21,14 +21,8 @@ const { snackbar, fechar } = useSnackbar()
       <RouterView />
     </v-main>
 
-    <v-snackbar v-model="snackbar.mostrar" :color="snackbar.cor" :timeout="5000" location="top">
-      {{ snackbar.mensagem }}
-
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="fechar">
-          Fechar
-        </v-btn>
-      </template>
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="3000">
+      {{ snackbar.message }}
     </v-snackbar>
   </v-app>
 </template>

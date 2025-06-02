@@ -11,6 +11,12 @@ interface ErrorResponse {
   message: string
 }
 
+interface RegisterRequest {
+  nome: string
+  email: string
+  senha: string
+}
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
 export const login = async (credentials: AuthRequest): Promise<AuthResponse> => {
@@ -39,4 +45,19 @@ export const getToken = (): string | null => {
 
 export const logout = (): void => {
   localStorage.removeItem('token')
+}
+
+export const register = async (data: RegisterRequest): Promise<void> => {
+  const response = await fetch(`${API_URL}/api/auth/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json()
+    throw new Error(errorData.message || 'Erro ao realizar cadastro')
+  }
 }
